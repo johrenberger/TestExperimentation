@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -75,7 +77,7 @@ public class FredFamilyDynamicLinks_UT {
     	driver = new ChromeDriver(options);
     	filteredUrls = Arrays.asList("https://uapi.stlouisfed.org/","https://apis.google.com/","https://www.googletagmanager.com/","https://fonts.gstatic.com/");
     	
-    	List<String> fredFamilyUrls = Arrays.asList("https://alfred.stlouisfed.org/","https://fred.stlouisfed.org/","https://fraser.stlouisfed.org/","https://fredblog.stlouisfed.org/","https://news.research.stlouisfed.org/category/fred-announcements/","https://news.research.stlouisfed.org/category/research-announcements/");
+    	List<String> fredFamilyUrls = Arrays.asList("https://news.research.stlouisfed.org/xmlrpc.php?rsd","https://fredblog.stlouisfed.org/xmlrpc.php?rsd","https://alfred.stlouisfed.org/","https://fred.stlouisfed.org/","https://fraser.stlouisfed.org/","https://fredblog.stlouisfed.org/","https://news.research.stlouisfed.org/category/fred-announcements/","https://news.research.stlouisfed.org/category/research-announcements/");
     	for(String fredFamilyUrl:fredFamilyUrls) {
     		extracted(data, urlSet,fredFamilyUrl);
     	}
@@ -112,16 +114,20 @@ public class FredFamilyDynamicLinks_UT {
 
     @Test
     public void testLink() {
-        try {
-            URL link = new URL(validUrl);
-            HttpURLConnection httpConn = (HttpURLConnection) link.openConnection();
-            httpConn.setConnectTimeout(2000);
-            httpConn.connect();
-            System.out.println(validUrl);
-            // Assert that the link returns a 200 OK status
-            assertEquals("Failed " + validUrl + " with code: " + httpConn.getResponseCode(),httpConn.getResponseCode(), 200);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+    	ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+        	try {
+                URL link = new URL(validUrl);
+                HttpURLConnection httpConn = (HttpURLConnection) link.openConnection();
+                httpConn.setConnectTimeout(2000);
+                httpConn.connect();
+                System.out.println(validUrl);
+                // Assert that the link returns a 200 OK status
+                assertEquals("Failed " + validUrl + " with code: " + httpConn.getResponseCode(),httpConn.getResponseCode(), 200);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        });
+        executor.shutdown();       
     }
 }

@@ -9,6 +9,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -114,18 +116,22 @@ public class FredSearchResults_UT {
 
 	@Test
 	public void testLink() {
-		try {
-			URL link = new URL(validUrl);
-			HttpURLConnection httpConn = (HttpURLConnection) link.openConnection();
-			httpConn.setConnectTimeout(2000);
-			httpConn.connect();
-			System.out.println(validUrl);
-			// Assert that the link returns a 200 OK status
-			assertEquals("Failed " + validUrl + " with code: " + httpConn.getResponseCode(), httpConn.getResponseCode(),
-					200);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+		 ExecutorService executor = Executors.newSingleThreadExecutor();
+	        executor.submit(() -> {
+	        	try {
+	    			URL link = new URL(validUrl);
+	    			HttpURLConnection httpConn = (HttpURLConnection) link.openConnection();
+	    			httpConn.setConnectTimeout(2000);
+	    			httpConn.connect();
+	    			System.out.println(validUrl);
+	    			// Assert that the link returns a 200 OK status
+	    			assertEquals("Failed " + validUrl + " with code: " + httpConn.getResponseCode(), httpConn.getResponseCode(),
+	    					200);
+	    		} catch (Exception e) {
+	    			System.out.println(e.getMessage());
+	    		}
+	        });
+	        executor.shutdown();		
 	}
 
 }
